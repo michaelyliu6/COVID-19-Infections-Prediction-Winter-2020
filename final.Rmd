@@ -1,0 +1,178 @@
+### Novel Coronavirus (COVID-19) in the United States
+### Michael Liu 
+### May 18, 2020
+
+### Introduction
+The coronavirus is a highly infectious disease that has quickly taken over the mindspace of the entire world. While most people that are infected with COVID-19 will only experience mild to moderate respiratory illness or no symptoms at all, Older people and people with underlying medical conditions can develop serious illness and even death. Without a clear vaccine or treatment for the virus, our government has implemented social distancing guidelines in an attempt to slow the spread of the virus so that our medical system can handle the influx of patients requiring treatment for coronavirus. However, it seems that this disease in the United States has become more of a political battle than a public health battle. So, in this experiment, I will analyze how has the coronavirus has affected public health and predict how it will continue to affect public health. 
+
+### Set Up
+First I will load all the libraries and data necessary to preform my experiment. 
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(broom)
+
+confirmed <- read_csv("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_confirmed_global.csv&filename=time_series_covid19_confirmed_global.csv") 
+deaths <- read_csv("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_deaths_global.csv&filename=time_series_covid19_deaths_global.csv") 
+recovered <- read_csv("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_recovered_global.csv&filename=time_series_covid19_recovered_global.csv")  
+
+```
+### Data curation, parsing, and management 
+For this experiment, I wanted to look specifically at developed countries that I felt had reliable data and countries that were in different stages of their coronavirus outbreak. To do this, I created a function that would output the number of coronavirus confirmed cases, deaths, and recoveries for each specific country. I chose to test the US, Brazil, Russia, Spain, and Italy. The new data frame would have each day be its own entity and combined the data frames of confirmed cases, deaths, and recoveries into a single table. This allows for us to see things like morality rate, rate of spread, and more all in one table. 
+```{r}
+get_total <- function(Country) {
+  fconfirmed <- confirmed %>%
+    filter(`Country/Region` == Country) %>%
+    select(-`Province/State`, -`Country/Region`, -Lat, -Long) %>%
+    gather(time) %>%
+    type_convert(col_types=cols(time=col_date(format="%m/%d/%y"))) %>%
+    rename(confirmed=value)
+  fdeaths <- deaths %>%
+    filter(`Country/Region` == Country) %>%
+    select(-`Province/State`, -`Country/Region`, -Lat, -Long) %>%
+    gather(time) %>%
+    type_convert(col_types=cols(time=col_date(format="%m/%d/%y"))) %>%
+    rename(deaths=value)
+  frecovered <- recovered %>%
+    filter(`Country/Region` == Country) %>%
+    select(-`Province/State`, -`Country/Region`, -Lat, -Long) %>%
+    gather(time) %>%
+    type_convert(col_types=cols(time=col_date(format="%m/%d/%y"))) %>%
+    rename(recovered=value)
+  ftotal <- fconfirmed %>%
+    full_join(fdeaths) %>%
+    full_join(frecovered)
+  return(ftotal)
+}
+US <- get_total("US")
+Brazil <- get_total("Brazil")
+Russia <- get_total("Russia")
+Spain <- get_total("Spain")
+Italy <- get_total("Italy")
+
+```
+### Exploratory Data Analysis
+After reorganizing the data for each country, I wanted to see what the data would look like on a graph. So, I wrote a function that would create a graph for each of the countries that can illustrate the change in number of confirmed cases, deaths, and recoveries in each country.
+```{r}
+graph <- function(country, title) {
+  country %>%
+  ggplot(aes(x=time)) + 
+  geom_line(aes(y = confirmed, color="blue")) +
+  geom_line(aes(y = deaths, color="red")) +
+  geom_line(aes(y = recovered, color="green")) +
+    labs(title = title,
+         x = "Date",
+         y = "Number of Cases") +
+  scale_color_identity(name = "Legend",
+                          breaks = c("blue", "red", "green"),
+                          labels = c("confirmed", "deaths", "recovered"),
+                          guide = "legend")
+  
+}
+US_Graph <- graph(US, "United States")
+Brazil_Graph <- graph(Brazil, "Brazil")
+Russia_Graph <- graph(Russia, "Russia")
+Spain_Graph <- graph(Spain, "Spain")
+Italy_Graph <- graph(Italy, "Italy")
+US_Graph
+Brazil_Graph
+Russia_Graph
+Spain_Graph
+Italy_Graph
+```
+## United States
+Confirmed Cases in the United States still has a increasing rate of change which indicates that we have yet to reach our peak. Deaths in the United States has been increase at a relatively constant rate which is a good sign considering we have yet to reach our peak and the number of people recovered is increasing at a faster rate. This could signify that we are coming up with better ways to treat people that do contract the disease and that we have yet to overwhelm our health system.
+
+## Brazil
+The confirmed cases in Brazil is still increasing at an extremely fast pace which indicates that they have yet to reach their peak and they are doing worse than other countries in an attempt to slow the spread. The number of deaths also has an increasing rate of change, but at a slower rate than the number of people recovering which could mean that Brazil has yet to overwhelm the health system.
+
+## Russia 
+The number of confirmed cases in Russia is still increasing at a fast pace which indicates that they have yet to reach their peak. The number of deaths is increasing but at a very slow rate, when compared to other countries. Meanwhile, their number of recovered has an quickly increasing rate of change. This could mean that the Russian people are better off fighting the disease, the Russians have better ways to treat patients with the virus, or the Russian government is under reporting the number of deaths.
+
+## Spain 
+The number of confirmed cases in Spain has begun to have a decreasing rate of change which may indicate that they have already reach their peak. Additionally the number of recovered and number of deaths has also begun to have a decreasing rate of change which further supports the theory that they have already reached their peak. Also, Spain never saw a spike in the number of deaths which may signify that they never had overwhelmed their health system. 
+
+## Italy 
+The number of confirmed cases in Italy has begun to have a decreasing rate of change which may indicate they they have already reached their peak. Also, the number of recovered has an increasing rate of change, while the number of deaths has a decreasing rate of change. This is quite interesting because it is the only country with different rates of change between the number of recovered and deaths. Additionally, the number of deaths in Italy has never spiked which may signify that they had never completely overwhelmed their health system. 
+
+### Hypothesis Testing and Machine Learning
+For the final part of this experiment, I want to try to predict the number of confirmed cases, deaths, and recoveries in the United States on June 1st, 2020. To do this, I chose to use linear regression because the rates of increase in the United States for confirmed cases, deaths, and recoveries seem to follow a linear pattern and we do not seem to be reaching our peak before June 1st, 2020 starting from April 1st, 2020.
+```{r}
+USdata <- US %>%
+  filter(time >= as.Date("2020-04-01"))
+```
+
+## Confirmed Cases in the US
+```{r}
+USdata %>%
+  ggplot(aes(x=time,y=confirmed)) + geom_line() + geom_smooth(method=lm)
+```
+```{r}
+auto_fit <- lm(confirmed~time, data=USdata)
+auto_fit
+
+auto_fit_stats <- auto_fit %>%
+  tidy()
+auto_fit_stats
+
+confidence_interval_offset <- 1.95 * auto_fit_stats$std.error[2]
+confidence_interval <- round(c(auto_fit_stats$estimate[2] - confidence_interval_offset,
+                               auto_fit_stats$estimate[2],
+                               auto_fit_stats$estimate[2] + confidence_interval_offset), 4)
+confidence_interval
+```
+We found a statistically significant relationship between time and number of confirmed cases. On average, there will be 27,593.07-27,971.76-28,350.45 new cases of coronavirus each day from April 1st,2020 to June 1st,2020. (t=144.0361, p=1.313018e-61).
+
+I predict that there will be about 1,906,333 cases of coronavirus on June 1st, 2020.
+## Deaths in the US
+```{r}
+USdata %>%
+  ggplot(aes(x=time,y=deaths)) + geom_line() + geom_smooth(method=lm)
+```
+```{r}
+auto_fit <- lm(deaths~time, data=USdata)
+auto_fit
+
+auto_fit_stats <- auto_fit %>%
+  tidy()
+auto_fit_stats
+
+confidence_interval_offset <- 1.95 * auto_fit_stats$std.error[2]
+confidence_interval <- round(c(auto_fit_stats$estimate[2] - confidence_interval_offset,
+                               auto_fit_stats$estimate[2],
+                               auto_fit_stats$estimate[2] + confidence_interval_offset), 4)
+confidence_interval
+```
+We found a statistically significant relationship between time and number of coronavirus deaths. On average, there will be 1,862.776-1,892.118-1,921.461 new coronavirus deaths each day  from April 1st,2020 to June 1st,2020. (t=125.7444	, p=5.834997e-59)
+
+I predict that there will be about 117,944 coronavirus deaths on June 1st, 2020.
+### Recoveries in the US
+```{r}
+USdata %>%
+  ggplot(aes(x=time,y=recovered)) + geom_line() + geom_smooth(method=lm)
+```
+```{r}
+auto_fit <- lm(recovered~time, data=USdata)
+auto_fit
+
+auto_fit_stats <- auto_fit %>%
+  tidy()
+auto_fit_stats
+
+confidence_interval_offset <- 1.95 * auto_fit_stats$std.error[2]
+confidence_interval <- round(c(auto_fit_stats$estimate[2] - confidence_interval_offset,
+                               auto_fit_stats$estimate[2],
+                               auto_fit_stats$estimate[2] + confidence_interval_offset), 4)
+confidence_interval
+```
+We found a statistically significant relationship between time and number of coronavirus recoveries. On average, there will be 5,731.860-6,063.334-6,394.809 new coronavirus recoveries each day  from April 1st,2020 to June 1st,2020. (t=35.66942, p=1.214679e-34)
+
+I predict that there will be about 363,215 coronavirus recoveries on June 1st, 2020.
+
+### Conclusions
+The novel coronavirus is undoubtly something that we should all be thinking about because of how many lives it will take and affect in the next few months. For the United States, I believe that it is too early to start easing restiction as our country has yet to reach its peak and there is still so much that is unknown about the virus. 
+
+As for my prediction using linear regression, the results may be underestimated if states easing restrictions causes a spike in infections and many more people will suffer as a result of it. However, if our country reaches its peak before June 1st, it is also possible that I may have overestimated the nubmer of people that will contract the disease. However, I still believe that it is more likely that my predictions will be an underestimation of the actual number of confirmed cases, deaths, and recoveries on June 1st, 2020. 
+
+I believe that the next few months ahead have much uncertainty, but we must proceed on the side of caution. 
