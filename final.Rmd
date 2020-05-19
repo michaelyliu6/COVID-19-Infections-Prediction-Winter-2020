@@ -125,6 +125,7 @@ confidence_interval
 We found a statistically significant relationship between time and number of confirmed cases. On average, there will be 27,593.07-27,971.76-28,350.45 new cases of coronavirus each day from April 1st,2020 to June 1st,2020. (t=144.0361, p=1.313018e-61).
 
 I predict that there will be about 1,906,333 cases of coronavirus on June 1st, 2020.
+
 ## Deaths in the US
 ```{r}
 USdata %>%
@@ -147,7 +148,8 @@ confidence_interval
 We found a statistically significant relationship between time and number of coronavirus deaths. On average, there will be 1,862.776-1,892.118-1,921.461 new coronavirus deaths each day  from April 1st,2020 to June 1st,2020. (t=125.7444	, p=5.834997e-59)
 
 I predict that there will be about 117,944 coronavirus deaths on June 1st, 2020.
-### Recoveries in the US
+
+## Recoveries in the US
 ```{r}
 USdata %>%
   ggplot(aes(x=time,y=recovered)) + geom_line() + geom_smooth(method=lm)

@@ -561,7 +561,10 @@ confidence_interval &lt;- round(c(auto_fit_stats$estimate[2] - confidence_interv
 confidence_interval</code></pre>
 <pre><code>## [1] 27593.07 27971.76 28350.45</code></pre>
 <p>We found a statistically significant relationship between time and number of confirmed cases. On average, there will be 27,593.07-27,971.76-28,350.45 new cases of coronavirus each day from April 1st,2020 to June 1st,2020. (t=144.0361, p=1.313018e-61).</p>
-<p>I predict that there will be about 1,906,333 cases of coronavirus on June 1st, 2020. ## Deaths in the US</p>
+<p>I predict that there will be about 1,906,333 cases of coronavirus on June 1st, 2020.</p>
+</div>
+<div id="deaths-in-the-us" class="section level2">
+<h2>Deaths in the US</h2>
 <pre class="r"><code>USdata %&gt;%
   ggplot(aes(x=time,y=deaths)) + geom_line() + geom_smooth(method=lm)</code></pre>
 <pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
@@ -590,7 +593,10 @@ confidence_interval &lt;- round(c(auto_fit_stats$estimate[2] - confidence_interv
 confidence_interval</code></pre>
 <pre><code>## [1] 1862.776 1892.118 1921.461</code></pre>
 <p>We found a statistically significant relationship between time and number of coronavirus deaths. On average, there will be 1,862.776-1,892.118-1,921.461 new coronavirus deaths each day from April 1st,2020 to June 1st,2020. (t=125.7444 , p=5.834997e-59)</p>
-<p>I predict that there will be about 117,944 coronavirus deaths on June 1st, 2020. ### Recoveries in the US</p>
+<p>I predict that there will be about 117,944 coronavirus deaths on June 1st, 2020.</p>
+</div>
+<div id="recoveries-in-the-us" class="section level2">
+<h2>Recoveries in the US</h2>
 <pre class="r"><code>USdata %&gt;%
   ggplot(aes(x=time,y=recovered)) + geom_line() + geom_smooth(method=lm)</code></pre>
 <pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
